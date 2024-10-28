@@ -3,6 +3,7 @@ package nl.gelton.emsbackend.service.impl;
 import lombok.AllArgsConstructor;
 import nl.gelton.emsbackend.dto.EmployeeDto;
 import nl.gelton.emsbackend.entity.Employee;
+import nl.gelton.emsbackend.exception.ResourceNotFoundException;
 import nl.gelton.emsbackend.mapper.EmployeeMapper;
 import nl.gelton.emsbackend.repository.EmployeeRepository;
 import nl.gelton.emsbackend.service.EmployeeService;
@@ -42,5 +43,18 @@ public class EmployeeServiceImpl implements EmployeeService {
 //        return employees.stream().map((employee) -> EmployeeMapper.mapToEmployeeDto(employee))
         return employees.stream().map(EmployeeMapper::mapToEmployeeDto)
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public EmployeeDto updateEmployee(Long employeeId, EmployeeDto updatedEmployee) {
+
+        Employee employeeToUpdate = employeeRepository.findById(employeeId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Employee does not exist with id: " + employeeId));
+        employeeToUpdate.setFirstName(updatedEmployee.getFirstName());
+        employeeToUpdate.setLastName(updatedEmployee.getLastName());
+        employeeToUpdate.setEmail(updatedEmployee.getEmail());
+        Employee savedEmployee = employeeRepository.save(employeeToUpdate);
+        return EmployeeMapper.mapToEmployeeDto(savedEmployee);
     }
 }
